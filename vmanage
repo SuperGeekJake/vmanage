@@ -14,7 +14,7 @@ if [ "$(whoami)" != 'root' ]; then
         exit 1;
 fi
 
-if [ "$action" != 'create' ] && [ "$action" != 'delete' ] 
+if [ "$action" != 'create' ] && [ "$action" != 'delete' ]
 	then
 		echo "You need to prompt for action (create or delete) -- Lower-case only !!!!!!"
 	    exit 1;
@@ -28,7 +28,7 @@ done
 
 rootdir=${domain//./}
 
-if [ "$action" == 'create' ] 
+if [ "$action" == 'create' ]
 	then
 		### check if domain already exists
 		if [ -e $sitesAvailable$domain$fextension ]; then
@@ -61,37 +61,37 @@ if [ "$action" == 'create' ]
 	CustomLog /var/log/apache2/$domain custom
 </VirtualHost>" > $sitesAvailable$domain$fextension
 		then
-			echo -e 'There is an ERROR create $domain file'
+			echo -e '[ERROR] Unable to create vhost config file.'
 			exit;
 		else
-			echo -e '\nNew Virtual Host Created\n'
+			echo -e '[INFO] Virtual host config created.'
 		fi
 
 		### Add domain in /etc/hosts
 		if ! echo "127.0.0.1       $domain" >> /etc/hosts
 		then
-		    echo "ERROR: Not able write in /etc/hosts"
+		    echo "[ERROR] Unable to write to /etc/hosts"
 		    exit;
 		else
-		    echo -e "Host added to /etc/hosts file \n"
+		    echo -e "[INFO] Host added to /etc/hosts file."
 		fi
 
 		### enable website
 		a2ensite $domain
-		 
+
 		### restart Apache
 		service apache2 restart
-		 
+
 		### give permission to root dir
 		chmod 755 $userDir$rootdir
 
 		### write test file in the new domain dir
 		if ! echo "<?php echo phpinfo(); ?>" > $userDir$rootdir/phpinfo.php
 		then
-		    echo "ERROR: Not able to write in file "$userDir"/"$rootdir"/phpinfo.php. Please check permissions."
+		    echo "[ERROR] Unable to write in file "$userDir"/"$rootdir"/phpinfo.php. Please check permissions."
 		    exit;
 		else
-		    echo "Added content to "$userDir$rootdir"/phpinfo.php."
+		    echo "[INFO] Added content to "$userDir$rootdir"/phpinfo.php."
 		fi
 
 		if [ "$owner" == ""  ]; then
@@ -101,26 +101,22 @@ if [ "$action" == 'create' ]
 		fi
 
 		### show the finished message
-		echo -e "Complete!
-		You now have a new Virtual Host
-		Your new host is: http://"$domain"
-		And its located at "$userDir$rootdir
+		echo -e "[SUCCESS] Complete. New host: http://"$domain", Location: "$userDir$rootdir
 		exit;
 	else
 		### check whether domain exists
 		if ! [ -e $sitesAvailable$domain$fextension ]; then
-			echo -e 'This domain dont exists.\nPlease Try Another one'
+			echo -e '[ERROR] Domain did not exist.'
 			exit;
 		fi
 
 		### check if directory exists or not
 		if ! [ -d $userDir$rootdir ]; then
-			echo -e 'Directory not exists !'
-			exit;
+      ### Delete the directory
+      rm -rf $userDir$rootdir
+    else
+      echo -e '[WARNING] Directory did not exist'
 		fi
-
-		### Delete the directory
-		rm -rf $userDir$rootdir
 
 		### Delete virtual host rules file
 		rm $sitesAvailable$domain$fextension
@@ -131,12 +127,11 @@ if [ "$action" == 'create' ]
 
 		### disable website
 		a2dissite $domain
-		 
+
 		### restart Apache
 		service apache2 restart
 
 		### show the finished message
-		echo -e "Complete!
-		You just removed Virtual Host "$domain
+		echo -e "[SUCCESS] Complete. Removed virtual host "$domain
 		exit 0;
 fi
