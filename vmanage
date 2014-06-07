@@ -7,7 +7,7 @@ owner=$(who am i | awk '{print $1}')
 sitesEnable='/etc/apache2/sites-enabled/'
 sitesAvailable='/etc/apache2/sites-available/'
 fextension='.conf'
-userDir=$(eval echo ~${SUDO_USER})'/www/'
+userDir=$(eval echo ~${SUDO_USER})'/public_html/'
 
 if [ "$(whoami)" != 'root' ]; then
         echo "You have no permission to run $0 as non-root user. Use sudo !!!"
